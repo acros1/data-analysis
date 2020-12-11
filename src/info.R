@@ -23,3 +23,10 @@ ggplot() +
   ylab('Number of Homicides')
 
 #what the fuck happened in the 90s
+
+plotPerState <- database %>% group_by(Year, State) %>% summarise(nb = n())
+ggplot(data = plotPerState,aes(x = Year, y = nb), color=State) +
+  geom_line() +
+  facet_wrap("State")
+
+#what the fuck california
