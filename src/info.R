@@ -21,9 +21,10 @@ plotPerYear <- gp_perYear %>% summarise(nb = n())
 
 ggplot() + 
   ggtitle("Number of Homicide Events Per Year") +
-  geom_point(data = plotPerYear, aes(x = Year, y = nb), color = "red") +
+  geom_line(data = plotPerYear, aes(x = Year, y = nb), color = "red") +
   xlab('Year') +
   ylab('Number of Homicides')
+
 
 #what the fuck happened in the 90s
 
