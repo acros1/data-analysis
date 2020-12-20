@@ -53,7 +53,13 @@ ggplot(data = crimeSolved, aes(x = "", y = crimeSolvedPourcent, fill = Crime.Sol
 
 "relationship per year"
 relationshipPerYear <- homicides %>% group_by(Year, Relationship) %>% summarise(nb = n())
-ggplot(data=relationshipPerYear, aes(x=Year, y=nb, fill=Relationship)) +
-  geom_bar(stat="identity")
+relationshipPerYearFiltered <- homicides %>% group_by(Year, Relationship) %>% summarise(nb = n()) %>% filter(Relationship != "Unknown")
+totalPerYearRelationships = rep(homicidesPerYear$nb, each=length(unique(relationshipPerYear$Relationship)))
 
-#AUSCOUR PK LES GENS TUENT AUTANT LEURS FEMMES
+for (i in 1:nrow(relationshipPerYear)) {
+  relationshipPerYear$total[i] <- filter(homicidesPerYear, Year == relationshipPerYear$Year[i])$nb
+}
+
+relationshipPerYear$percent <- relationshipPerYear$nb / relationshipPerYear$total * 100
+ggplot(data=relationshipPerYear, aes(x=Year, y=percent, fill=Relationship)) +
+  geom_bar(stat="identity")
