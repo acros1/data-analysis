@@ -51,10 +51,8 @@ ggplot(data = crimeSolved, aes(x = "", y = crimeSolvedPourcent, fill = Crime.Sol
   theme(axis.text.x=element_blank()) +
   geom_text(aes(y = 1/crimeSolvedPourcent + c(0, cumsum(crimeSolvedPourcent)[-length(crimeSolvedPourcent)]), label = scales::percent(crimeSolvedPourcent/100)), size=5, hjust = 2)
 
-"relationship per year"
+#relationship per year
 relationshipPerYear <- homicides %>% group_by(Year, Relationship) %>% summarise(nb = n())
-relationshipPerYearFiltered <- homicides %>% group_by(Year, Relationship) %>% summarise(nb = n()) %>% filter(Relationship != "Unknown")
-totalPerYearRelationships = rep(homicidesPerYear$nb, each=length(unique(relationshipPerYear$Relationship)))
 
 for (i in 1:nrow(relationshipPerYear)) {
   relationshipPerYear$total[i] <- filter(homicidesPerYear, Year == relationshipPerYear$Year[i])$nb
@@ -62,4 +60,13 @@ for (i in 1:nrow(relationshipPerYear)) {
 
 relationshipPerYear$percent <- relationshipPerYear$nb / relationshipPerYear$total * 100
 ggplot(data=relationshipPerYear, aes(x=Year, y=percent, fill=Relationship)) +
+  geom_bar(stat="identity")
+
+relationshipPerYearFiltered <- homicides %>% group_by(Year, Relationship) %>% summarise(nb = n()) %>% filter(Relationship != "Unknown")
+homicidesPerYearFiltered <- homicides %>% filter(Relationship != "Unknown") %>% group_by(Year) %>% summarise(nb = n())
+for (i in 1:nrow(relationshipPerYearFiltered)) {
+  relationshipPerYearFiltered$total[i] <- filter(homicidesPerYearFiltered, Year == relationshipPerYearFiltered$Year[i])$nb
+}
+relationshipPerYearFiltered$percent <- relationshipPerYearFiltered$nb / relationshipPerYearFiltered$total * 100
+ggplot(data=relationshipPerYearFiltered, aes(x=Year, y=percent, fill=Relationship)) +
   geom_bar(stat="identity")
