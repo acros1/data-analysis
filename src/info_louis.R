@@ -51,4 +51,9 @@ ggplot(data = crimeSolved, aes(x = "", y = crimeSolvedPourcent, fill = Crime.Sol
   theme(axis.text.x=element_blank()) +
   geom_text(aes(y = 1/crimeSolvedPourcent + c(0, cumsum(crimeSolvedPourcent)[-length(crimeSolvedPourcent)]), label = scales::percent(crimeSolvedPourcent/100)), size=5, hjust = 2)
 
+"relationship per year"
+relationshipPerYear <- homicides %>% group_by(Year, Relationship) %>% summarise(nb = n())
+ggplot(data=relationshipPerYear, aes(x=Year, y=nb, fill=Relationship)) +
+  geom_bar(stat="identity")
 
+#AUSCOUR PK LES GENS TUENT AUTANT LEURS FEMMES

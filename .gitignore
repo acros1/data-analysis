@@ -1,3 +1,4 @@
-#Do not track the raw dataset file
+#Do not track the raw dataset file or temp files
 
-dataset/database.csv
+dataset/homicide-reports-1980_2014.csv
+src/.Rhistory
