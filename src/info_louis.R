@@ -53,18 +53,21 @@ ggplot(data = crimeSolved, aes(x = "", y = crimeSolvedPourcent, fill = Crime.Sol
 
 #relationship per year
 relationshipPerYear <- homicides %>% group_by(Year, Relationship) %>% summarise(nb = n())
-
+#put the total amount of homicides per year on each row for percentage calculation
 for (i in 1:nrow(relationshipPerYear)) {
   relationshipPerYear$total[i] <- filter(homicidesPerYear, Year == relationshipPerYear$Year[i])$nb
 }
-
+#calculate the percentage
 relationshipPerYear$percent <- relationshipPerYear$nb / relationshipPerYear$total * 100
+#plot a coloured bar graph
 ggplot(data=relationshipPerYear, aes(x=Year, y=percent, fill=Relationship)) +
   geom_bar(stat="identity")
 
-#relationships but removing uknown values
+#relationships but removing unknown values
 relationshipPerYearFiltered <- homicides %>% group_by(Year, Relationship) %>% summarise(nb = n()) %>% filter(Relationship != "Unknown")
+#homicides but removing unknown values
 homicidesPerYearFiltered <- homicides %>% filter(Relationship != "Unknown") %>% group_by(Year) %>% summarise(nb = n())
+#put the total amount of homicides per year on each row for percentage calculation
 for (i in 1:nrow(relationshipPerYearFiltered)) {
   relationshipPerYearFiltered$total[i] <- filter(homicidesPerYearFiltered, Year == relationshipPerYearFiltered$Year[i])$nb
 }
@@ -73,6 +76,53 @@ ggplot(data=relationshipPerYearFiltered, aes(x=Year, y=percent, fill=Relationshi
   geom_bar(stat="identity")
 
 #filtered relationships but removing very low values
-relationshipFilteredNoLowValues <- relationshipPerYearFiltered %>% filter(percent<10)
+relationshipFilteredNoLowValues <- relationshipPerYearFiltered %>% filter(percent>1.5)
 ggplot(data=relationshipFilteredNoLowValues, aes(x=Year, y=percent, fill=Relationship)) +
   geom_bar(stat="identity")
+
+#sort by categories
+relationshipPerYearCategories = homicides
+#sorting all relationship into 9 categories for more clarity:
+#acquaintance, significant other, ex significant other, family, indirect family, professional, stranger, unkown
+for (i in 1:nrow(relationshipPerYearCategories)){
+  relationshipPerYearCategories$Category[i] <- switch (relationshipPerYearCategories$Relationship[i],
+    "Acquaintance" =  "acquaintance",
+    "Boyfriend" =  "significant other",
+    "Boyfriend/Girlfriend" =  "significant other",
+    "Brother" =  "family",
+    "Common-Law Husband" =  "significant other",
+    "Common-Law Wife" =  "significant other",
+    "Daughter" =  "family",
+    "Employee" =  "professional",
+    "Employer" =  "professional",
+    "Ex-Husband" = "ex significant other",
+    "Ex-Wife" =  "ex significant other",
+    "Family" =  "family",
+    "Father" =  "family",
+    "Friend" =  "acquaintance",
+    "Girlfriend" =  "significant other",
+    "Husband" =  "significant other",
+    "In-Law" =  "indirect family",
+    "Mother" =  "family",
+    "Neighbor" =  "acquaintance",
+    "Sister" =  "family",
+    "Son"=  "family",
+    "Stepdaughter" = "indirect family",
+    "Stepfather" =  "indirect family",
+    "Stepmother" =  "indirect family",
+    "Stepson" =  "indirect family",
+    "Stranger" =  "stranger",
+    "Wife" =  "significant other",
+    "Unknown" =  "unknown"
+  )
+}
+#formating data to get a percentage bar graph
+relationshipPerYearCategoriesPercent <- relationshipPerYearCategories %>% group_by(Year, Category) %>% summarize(nb=n())
+for (i in 1:nrow(relationshipPerYearCategoriesPercent)) {
+  relationshipPerYearCategoriesPercent$total[i] <- filter(homicidesPerYear, Year == relationshipPerYearCategoriesPercent$Year[i])$nb
+}
+
+relationshipPerYearCategoriesPercent$percent <- relationshipPerYearCategoriesPercent$nb / relationshipPerYearCategoriesPercent$total * 100
+ggplot(data=relationshipPerYearCategoriesPercent, aes(x=Year, y=percent, fill=Category)) +
+  geom_bar(stat="identity")
+
