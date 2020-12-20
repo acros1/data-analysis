@@ -62,6 +62,7 @@ relationshipPerYear$percent <- relationshipPerYear$nb / relationshipPerYear$tota
 ggplot(data=relationshipPerYear, aes(x=Year, y=percent, fill=Relationship)) +
   geom_bar(stat="identity")
 
+#relationships but removing uknown values
 relationshipPerYearFiltered <- homicides %>% group_by(Year, Relationship) %>% summarise(nb = n()) %>% filter(Relationship != "Unknown")
 homicidesPerYearFiltered <- homicides %>% filter(Relationship != "Unknown") %>% group_by(Year) %>% summarise(nb = n())
 for (i in 1:nrow(relationshipPerYearFiltered)) {
@@ -69,4 +70,9 @@ for (i in 1:nrow(relationshipPerYearFiltered)) {
 }
 relationshipPerYearFiltered$percent <- relationshipPerYearFiltered$nb / relationshipPerYearFiltered$total * 100
 ggplot(data=relationshipPerYearFiltered, aes(x=Year, y=percent, fill=Relationship)) +
+  geom_bar(stat="identity")
+
+#filtered relationships but removing very low values
+relationshipFilteredNoLowValues <- relationshipPerYearFiltered %>% filter(percent<10)
+ggplot(data=relationshipFilteredNoLowValues, aes(x=Year, y=percent, fill=Relationship)) +
   geom_bar(stat="identity")
