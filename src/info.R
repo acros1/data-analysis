@@ -51,4 +51,7 @@ ggplot(data = crimeSolved, aes(x = "", y = crimeSolvedPourcent, fill = Crime.Sol
   theme(axis.text.x=element_blank()) +
   geom_text(aes(y = 1/crimeSolvedPourcent + c(0, cumsum(crimeSolvedPourcent)[-length(crimeSolvedPourcent)]), label = scales::percent(crimeSolvedPourcent/100)), size=5, hjust = 2)
 
-
+#ethnicity
+ethnicityPerYear <- homicides %>% group_by(Year, Perpetrator.Ethnicity) %>% summarise(nb = n())
+ggplot(data=ethnicityPerYear, aes(x=Year, y=nb, fill=Perpetrator.Ethnicity)) +
+  geom_bar(stat="identity")
