@@ -51,7 +51,17 @@ ggplot(data = crimeSolved, aes(x = "", y = crimeSolvedPourcent, fill = Crime.Sol
   theme(axis.text.x=element_blank()) +
   geom_text(aes(y = 1/crimeSolvedPourcent + c(0, cumsum(crimeSolvedPourcent)[-length(crimeSolvedPourcent)]), label = scales::percent(crimeSolvedPourcent/100)), size=5, hjust = 2)
 
-#ethnicity
+# Perpetrators ethnicity
 ethnicityPerYear <- homicides %>% group_by(Year, Perpetrator.Ethnicity) %>% summarise(nb = n())
 ggplot(data=ethnicityPerYear, aes(x=Year, y=nb, fill=Perpetrator.Ethnicity)) +
+  geom_bar(stat="identity")
+
+# Victims ethnicity
+victimEthnicityPerYear <- homicides %>% group_by(Year, Victim.Ethnicity) %>% summarise(nb = n())
+ggplot(data=victimEthnicityPerYear, aes(x=Year, y=nb, fill=Victim.Ethnicity)) +
+  geom_bar(stat="identity")
+
+# Perpetrators "race"
+racePerYear <- homicides %>% group_by(Year, Perpetrator.Race) %>% summarise(nb = n())
+ggplot(data=racePerYear, aes(x=Year, y=nb, fill=Perpetrator.Race)) +
   geom_bar(stat="identity")
