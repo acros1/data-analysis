@@ -8,7 +8,9 @@ scriptPath = paste(dirname(rstudioapi::getSourceEditorContext()$path), "/../data
 # And this trick to delete a parasite space
 scriptPath = gsub ("src ", "src", scriptPath)
 # Homicides
-homicides = read.csv(file = file.path(scriptPath, "homicide-reports-1980_2014.csv"), sep = ",")
+homicidesF = read.csv(file = file.path(scriptPath, "homicide-reports-1980_2014.csv"), sep = ",",
+                     na.strings = c("NA", "Unknown"))
+homicides <- droplevels(na.omit(homicidesF))
 
 rowNb = nrow(homicides)
 columnNb = ncol(homicides)
@@ -65,3 +67,29 @@ ggplot(data=victimEthnicityPerYear, aes(x=Year, y=nb, fill=Victim.Ethnicity)) +
 racePerYear <- homicides %>% group_by(Year, Perpetrator.Race) %>% summarise(nb = n())
 ggplot(data=racePerYear, aes(x=Year, y=nb, fill=Perpetrator.Race)) +
   geom_bar(stat="identity")
+
+
+library(babynames)
+library(viridis)
+library(hrbrthemes)
+library(plotly)
+
+# Load dataset from github
+#data <- babynames %>% 
+#  filter(name %in% c("Ashley", "Amanda", "Jessica",    "Patricia", "Linda", "Deborah",   "Dorothy", "Betty", "Helen")) %>%
+#  filter(sex=="F")
+data <- homicides %>% group_by(Year, Perpetrator.Ethnicity) %>% summarise(nb = n())
+
+# Plot
+p <- data %>% 
+  ggplot( aes(x=Year, y=nb, fill=Perpetrator.Ethnicity, text=Perpetrator.Ethnicity)) +
+  geom_area( ) +
+  scale_fill_viridis(discrete = TRUE) +
+  theme(legend.position="none") +
+  ggtitle("Popularity of American names in the previous 30 years") +
+  theme_ipsum() +
+  theme(legend.position="none")
+
+# Turn it interactive
+p <- ggplotly(p, tooltip="text")
+p
