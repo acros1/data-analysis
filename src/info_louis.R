@@ -73,7 +73,7 @@ for (i in 1:nrow(relationshipPerYearFiltered)) {
 }
 relationshipPerYearFiltered$percent <- relationshipPerYearFiltered$nb / relationshipPerYearFiltered$total * 100
 ggplot(data=relationshipPerYearFiltered, aes(x=Year, y=percent, fill=Relationship)) +
-  geom_bar(stat="identity")
+  geom_area(stat="identity")
 
 #filtered relationships but removing very low values
 relationshipFilteredNoLowValues <- relationshipPerYearFiltered %>% filter(percent>1.5)
@@ -124,5 +124,22 @@ for (i in 1:nrow(relationshipPerYearCategoriesPercent)) {
 
 relationshipPerYearCategoriesPercent$percent <- relationshipPerYearCategoriesPercent$nb / relationshipPerYearCategoriesPercent$total * 100
 ggplot(data=relationshipPerYearCategoriesPercent, aes(x=Year, y=percent, fill=Category)) +
-  geom_bar(stat="identity")
+  geom_area(stat="identity")
+
+#now let's look at age difference
+agedifference = homicides
+agedifference$diff <- agedifference$Perpetrator.Age - agedifference$Victim.Age
+agedifference$absdiff <- abs(agedifference$Perpetrator.Age - agedifference$Victim.Age)
+
+agedifferenceplot <- agedifference %>% group_by(Year) %>% summarize(averagediff = mean(diff), nb = n())
+
+for (i in 1:nrow(agedifference)) {
+  agedifference$total[i] <- filter(homicidesPerYear, Year == agedifference$Year[i])$nb
+}
+
+
+ggplot() + 
+  geom_line(data = agedifferenceplot, aes(x = Year, y = averagediff), color = "red") +
+  xlab('Year') +
+  ylab('average age difference between victim and perpetrator')
 
