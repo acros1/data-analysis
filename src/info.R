@@ -44,6 +44,20 @@ ggplot(data = perPerSex, aes(x = "", y = perPerSexPourcent, fill = Perpetrator.S
   geom_label_repel(aes(label = perPerSexPourcent), size=5, show.legend = F, nudge_x = 0.5) +
   guides(fill = guide_legend(title = "Sex"))
 
+# Men/women perpetrator ratio
+library(dplyr)
+perPerSex <- homicidesF %>% group_by(Year, Perpetrator.Sex) %>% summarise(nb = n())
+# Plot
+ggplot(perPerSex, aes(x=Year, y=nb, fill=Perpetrator.Sex)) + 
+  geom_area(alpha=0.6 , size=1, colour="black")
+
+# Men/women victims ratio
+library(dplyr)
+vicPerSex <- homicidesF %>% group_by(Year, Victim.Sex) %>% summarise(nb = n())
+# Plot
+ggplot(vicPerSex, aes(x=Year, y=nb, fill=Victim.Sex)) + 
+  geom_area(alpha=0.6 , size=1, colour="black")
+
 # Crime solved
 crimeSolved <- homicides %>% group_by(Crime.Solved) %>% summarise(nb = n())
 crimeSolvedPourcent <- crimeSolved$nb / nrow(homicides) * 100
@@ -74,10 +88,7 @@ library(viridis)
 library(hrbrthemes)
 library(plotly)
 
-# Load dataset from github
-#data <- babynames %>% 
-#  filter(name %in% c("Ashley", "Amanda", "Jessica",    "Patricia", "Linda", "Deborah",   "Dorothy", "Betty", "Helen")) %>%
-#  filter(sex=="F")
+# Perpetrator ethnicity comparison for each year
 data <- homicides %>% group_by(Year, Perpetrator.Ethnicity) %>% summarise(nb = n())
 
 # Plot
@@ -86,9 +97,26 @@ p <- data %>%
   geom_area( ) +
   scale_fill_viridis(discrete = TRUE) +
   theme(legend.position="none") +
-  ggtitle("Popularity of American names in the previous 30 years") +
+  ggtitle("Perpetrator ethnicity per year") +
   theme_ipsum() +
-  theme(legend.position="none")
+  theme(legend.position="top")
+
+# Turn it interactive
+p <- ggplotly(p, tooltip="text")
+p
+
+# Perpetrator ethnicity comparison for each year
+data1 <- homicidesF %>% group_by(Year, Perpetrator.Race) %>% summarise(nb = n())
+
+# Plot
+p <- data1 %>% 
+  ggplot( aes(x=Year, y=nb, fill=Perpetrator.Race, text=Perpetrator.Race)) +
+  geom_area( ) +
+  scale_fill_viridis(discrete = TRUE) +
+  theme(legend.position="none") +
+  ggtitle("Perpetrator race per year") +
+  theme_ipsum() +
+  theme(legend.position="top")
 
 # Turn it interactive
 p <- ggplotly(p, tooltip="text")
