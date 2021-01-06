@@ -9,6 +9,7 @@ scriptPath = paste(dirname(rstudioapi::getSourceEditorContext()$path), "/../data
 scriptPath = gsub ("src ", "src", scriptPath)
 # Homicides
 homicides = read.csv(file = file.path(scriptPath, "homicide-reports-1980_2014.csv"), sep = ",")
+homicidesFiltered <- filter(homicides, Relationship != "Unknown")
 
 rowNb = nrow(homicides)
 columnNb = ncol(homicides)
@@ -66,7 +67,7 @@ ggplot(data=relationshipPerYear, aes(x=Year, y=percent, fill=Relationship)) +
 #relationships but removing unknown values
 relationshipPerYearFiltered <- homicides %>% group_by(Year, Relationship) %>% summarise(nb = n()) %>% filter(Relationship != "Unknown")
 #homicides but removing unknown values
-homicidesPerYearFiltered <- homicides %>% filter(Relationship != "Unknown") %>% group_by(Year) %>% summarise(nb = n())
+homicidesPerYearFiltered <- homicidesFiltered %>% group_by(Year) %>% summarise(nb = n())
 #put the total amount of homicides per year on each row for percentage calculation
 for (i in 1:nrow(relationshipPerYearFiltered)) {
   relationshipPerYearFiltered$total[i] <- filter(homicidesPerYearFiltered, Year == relationshipPerYearFiltered$Year[i])$nb
@@ -81,7 +82,7 @@ ggplot(data=relationshipFilteredNoLowValues, aes(x=Year, y=percent, fill=Relatio
   geom_bar(stat="identity")
 
 #sort by categories
-relationshipPerYearCategories = homicides
+relationshipPerYearCategories = homicidesFiltered
 #sorting all relationship into 9 categories for more clarity:
 #acquaintance, significant other, ex significant other, family, indirect family, professional, stranger, unkown
 for (i in 1:nrow(relationshipPerYearCategories)){
@@ -124,6 +125,50 @@ for (i in 1:nrow(relationshipPerYearCategoriesPercent)) {
 
 relationshipPerYearCategoriesPercent$percent <- relationshipPerYearCategoriesPercent$nb / relationshipPerYearCategoriesPercent$total * 100
 ggplot(data=relationshipPerYearCategoriesPercent, aes(x=Year, y=percent, fill=Category)) +
+  geom_area(stat="identity")
+
+#let's do the same without unknowns
+relationshipPerYearFilteredCategories = homicidesFiltered
+for (i in 1:nrow(relationshipPerYearFilteredCategories)){
+  relationshipPerYearFilteredCategories$Category[i] <- switch (relationshipPerYearFilteredCategories$Relationship[i],
+                                                       "Acquaintance" =  "acquaintance",
+                                                       "Boyfriend" =  "significant other",
+                                                       "Boyfriend/Girlfriend" =  "significant other",
+                                                       "Brother" =  "family",
+                                                       "Common-Law Husband" =  "significant other",
+                                                       "Common-Law Wife" =  "significant other",
+                                                       "Daughter" =  "family",
+                                                       "Employee" =  "professional",
+                                                       "Employer" =  "professional",
+                                                       "Ex-Husband" = "ex significant other",
+                                                       "Ex-Wife" =  "ex significant other",
+                                                       "Family" =  "family",
+                                                       "Father" =  "family",
+                                                       "Friend" =  "acquaintance",
+                                                       "Girlfriend" =  "significant other",
+                                                       "Husband" =  "significant other",
+                                                       "In-Law" =  "indirect family",
+                                                       "Mother" =  "family",
+                                                       "Neighbor" =  "acquaintance",
+                                                       "Sister" =  "family",
+                                                       "Son"=  "family",
+                                                       "Stepdaughter" = "indirect family",
+                                                       "Stepfather" =  "indirect family",
+                                                       "Stepmother" =  "indirect family",
+                                                       "Stepson" =  "indirect family",
+                                                       "Stranger" =  "stranger",
+                                                       "Wife" =  "significant other",
+                                                       "Unknown" =  "unknown"
+  )
+}
+
+relationshipPerYearFilteredCategoriesPercent <- relationshipPerYearFilteredCategories %>% group_by(Year, Category) %>% summarize(nb=n())
+for (i in 1:nrow(relationshipPerYearFilteredCategoriesPercent)) {
+  relationshipPerYearFilteredCategoriesPercent$total[i] <- filter(homicidesPerYearFiltered, Year == relationshipPerYearFilteredCategoriesPercent$Year[i])$nb
+}
+
+relationshipPerYearFilteredCategoriesPercent$percent <- relationshipPerYearFilteredCategoriesPercent$nb / relationshipPerYearFilteredCategoriesPercent$total * 100
+ggplot(data=relationshipPerYearFilteredCategoriesPercent, aes(x=Year, y=percent, fill=Category)) +
   geom_area(stat="identity")
 
 #now let's look at age difference
