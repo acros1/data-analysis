@@ -2,6 +2,7 @@
 
 library("ggplot2")
 library("dplyr")
+library(ggrepel)
 
 # Path to dataset is creating by this trick
 scriptPath = paste(dirname(rstudioapi::getSourceEditorContext()$path), "/../dataset")
@@ -32,7 +33,7 @@ ggplot(data = homicidesPerState, aes(x = Year, y = nb), color=State) +
   facet_wrap("State")
 
 # What the fuck California
-library(ggrepel)
+
 
 # Men/women perpetrator ratio
 perPerSex <- homicides %>% group_by(Perpetrator.Sex) %>% summarise(nb = n())
@@ -181,10 +182,11 @@ agedifferenceplot <- agedifference %>% group_by(Year) %>% summarize(averagediff 
 for (i in 1:nrow(agedifference)) {
   agedifference$total[i] <- filter(homicidesPerYear, Year == agedifference$Year[i])$nb
 }
+agedifference$yearfactor <-as.factor(agedifference$Year)
+#have to fix the values as there are a few outliers at unreasonable age differences
+agedifferencefix <- filter(agedifference, diff >(-80))
 
-
-ggplot() + 
-  geom_line(data = agedifferenceplot, aes(x = Year, y = averagediff), color = "red") +
-  xlab('Year') +
-  ylab('average age difference between victim and perpetrator')
-
+ggplot(agedifferencefix, aes(x=yearfactor,y=diff)) + 
+  geom_boxplot() +
+  xlab("Year") +
+  ylab("Age difference between perpetrator and victim")
