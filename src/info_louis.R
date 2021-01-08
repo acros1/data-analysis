@@ -25,24 +25,11 @@ ggplot() +
   xlab('Year') +
   ylab('Number of Homicides')
 
-# What the fuck happened in the 90s
-
+#We also look at the stats per individual state
 homicidesPerState <- homicides %>% group_by(Year, State) %>% summarise(nb = n())
 ggplot(data = homicidesPerState, aes(x = Year, y = nb), color=State) +
   geom_line() +
   facet_wrap("State")
-
-# What the fuck California
-
-
-# Men/women perpetrator ratio
-perPerSex <- homicides %>% group_by(Perpetrator.Sex) %>% summarise(nb = n())
-perPerSexPourcent <- perPerSex$nb / nrow(homicides) * 100
-ggplot(data = perPerSex, aes(x = "", y = perPerSexPourcent, fill = Perpetrator.Sex)) +
-  geom_bar(width = 1, stat = "identity") +
-  coord_polar("y", start=0) +
-  geom_label_repel(aes(label = perPerSexPourcent), size=5, show.legend = F, nudge_x = 0.5) +
-  guides(fill = guide_legend(title = "Sex"))
 
 # Crime solved
 crimeSolved <- homicides %>% group_by(Crime.Solved) %>% summarise(nb = n())
@@ -76,11 +63,6 @@ for (i in 1:nrow(relationshipPerYearFiltered)) {
 relationshipPerYearFiltered$percent <- relationshipPerYearFiltered$nb / relationshipPerYearFiltered$total * 100
 ggplot(data=relationshipPerYearFiltered, aes(x=Year, y=percent, fill=Relationship)) +
   geom_area(stat="identity")
-
-#filtered relationships but removing very low values
-relationshipFilteredNoLowValues <- relationshipPerYearFiltered %>% filter(percent>1.5)
-ggplot(data=relationshipFilteredNoLowValues, aes(x=Year, y=percent, fill=Relationship)) +
-  geom_bar(stat="identity")
 
 #sort by categories
 relationshipPerYearCategories = homicidesFiltered
@@ -118,12 +100,11 @@ for (i in 1:nrow(relationshipPerYearCategories)){
     "Unknown" =  "unknown"
   )
 }
-#formating data to get a percentage bar graph
+#formating data to get a stacked area graph and percentages
 relationshipPerYearCategoriesPercent <- relationshipPerYearCategories %>% group_by(Year, Category) %>% summarize(nb=n())
 for (i in 1:nrow(relationshipPerYearCategoriesPercent)) {
   relationshipPerYearCategoriesPercent$total[i] <- filter(homicidesPerYear, Year == relationshipPerYearCategoriesPercent$Year[i])$nb
 }
-
 relationshipPerYearCategoriesPercent$percent <- relationshipPerYearCategoriesPercent$nb / relationshipPerYearCategoriesPercent$total * 100
 ggplot(data=relationshipPerYearCategoriesPercent, aes(x=Year, y=percent, fill=Category)) +
   geom_area(stat="identity")
